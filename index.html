@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy 30th Birthday, Shiela Mae</title>
+  <style>
+    :root {
+      --bg-top:    #e8e4f0;
+      --bg-bottom: #d8e8d4;
+      --stem:  #7a9b76;
+      --leaf:  #8aab84;
+      --f1:    #c9b8d4;
+      --f2:    #d4b8c4;
+      --f3:    #e8d5b8;
+      --text:  #4a3f5c;
+      --tsub:  #6a5f7c;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(155deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── FRAME ── */
+    #frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .drawable {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .sp { stroke: var(--stem); stroke-width: 2.5; }
+    .bp { stroke: var(--stem); stroke-width: 1.8; }
+    .lp { stroke: var(--leaf);  stroke-width: 1.5; }
+
+    /* Draw-on: triggered by class on #frame */
+    .draw-stems   .sp { animation: draw 1.9s cubic-bezier(.4,0,.2,1) forwards; }
+    .draw-branches .bp { animation: draw 1.6s cubic-bezier(.4,0,.2,1) forwards; }
+    .draw-leaves   .lp { animation: draw 1.3s cubic-bezier(.4,0,.2,1) forwards; }
+
+    /* Corner stagger */
+    .tl .sp { animation-delay: 0s;    } .tr .sp { animation-delay: .35s; }
+    .bl .sp { animation-delay: .60s;  } .br .sp { animation-delay: .90s; }
+    .tl .bp { animation-delay: 0s;    } .tr .bp { animation-delay: .35s; }
+    .bl .bp { animation-delay: .60s;  } .br .bp { animation-delay: .90s; }
+    .tl .lp { animation-delay: 0s;    } .tr .lp { animation-delay: .25s; }
+    .bl .lp { animation-delay: .45s;  } .br .lp { animation-delay: .65s; }
+
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    /* Flowers: bloom on class */
+    .fg {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      transform: scale(0);
+    }
+    .bloom .fg { animation: bloom .7s cubic-bezier(.34,1.56,.64,1) forwards; }
+    .bloom .tl .fg:nth-child(1) { animation-delay: .0s; }
+    .bloom .tl .fg:nth-child(2) { animation-delay: .2s; }
+    .bloom .tl .fg:nth-child(3) { animation-delay: .4s; }
+    .bloom .tr .fg:nth-child(1) { animation-delay: .1s; }
+    .bloom .tr .fg:nth-child(2) { animation-delay: .3s; }
+    .bloom .tr .fg:nth-child(3) { animation-delay: .5s; }
+    .bloom .bl .fg:nth-child(1) { animation-delay: .2s; }
+    .bloom .bl .fg:nth-child(2) { animation-delay: .4s; }
+    .bloom .bl .fg:nth-child(3) { animation-delay: .6s; }
+    .bloom .br .fg:nth-child(1) { animation-delay: .3s; }
+    .bloom .br .fg:nth-child(2) { animation-delay: .5s; }
+    .bloom .br .fg:nth-child(3) { animation-delay: .7s; }
+
+    /* Extra flowers (final bloom) */
+    .xf {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      transform: scale(0);
+    }
+    .final-bloom .xf { animation: bloom .55s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+    @keyframes bloom { to { opacity: 1; transform: scale(1); } }
+
+    /* ── PETALS ── */
+    #petals {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .pw { position: absolute; top: -80px; opacity: 0; }
+    #petals.on .pw { animation: drift linear infinite; }
+    @keyframes drift {
+      0%   { transform: translateY(0) rotate(0deg);     opacity: 0; }
+      8%   { opacity: .65; }
+      92%  { opacity: .40; }
+      100% { transform: translateY(110vh) rotate(400deg); opacity: 0; }
+    }
+
+    /* ── CONTENT ── */
+    #content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 640px;
+      width: 90vw;
+      padding: 2rem 1rem;
+    }
+
+    .qwrap {
+      position: relative;
+      height: clamp(7rem, 18vw, 10rem);
+      margin-bottom: 1.5rem;
+    }
+    .q {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(.95rem, 2.4vw, 1.2rem);
+      font-style: italic;
+      color: var(--tsub);
+      line-height: 1.75;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      padding: 0 .5rem;
+    }
+    .q.on { opacity: 1; }
+
+    #bday-title {
+      font-size: clamp(1.3rem, 3.8vw, 2rem);
+      font-weight: normal;
+      letter-spacing: .1em;
+      color: var(--text);
+      min-height: 2.6rem;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .dot {
+      display: block;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--f1);
+      margin: .8rem auto;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .dot.on { opacity: .55; }
+
+    #bday-name {
+      position: relative;
+      font-size: clamp(1.7rem, 5vw, 2.8rem);
+      font-weight: normal;
+      letter-spacing: .04em;
+      color: var(--text);
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    #bday-name.on { opacity: 1; }
+    #bday-name::before {
+      content: '';
+      position: absolute;
+      inset: -60px -100px;
+      background: radial-gradient(ellipse, rgba(201,184,212,.32) 0%, transparent 68%);
+      pointer-events: none;
+    }
+
+    #bday-sub {
+      font-size: clamp(.9rem, 2vw, 1.05rem);
+      color: var(--tsub);
+      margin-top: .9rem;
+      opacity: 0;
+      transition: opacity 1.3s ease;
+    }
+    #bday-sub.on { opacity: 1; }
+
+    #bday-close {
+      font-size: clamp(.8rem, 1.7vw, .92rem);
+      font-style: italic;
+      color: var(--tsub);
+      margin-top: 1.1rem;
+      opacity: 0;
+      transition: opacity 1.6s ease;
+    }
+    #bday-close.on { opacity: .7; }
+  </style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- BOTANICAL FRAME -->
+  <svg id="frame" viewBox="0 0 800 560" preserveAspectRatio="none"
+       xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+
+    <!-- reference corner: top-left -->
+    <g class="tl">
+      <path class="drawable sp" d="M 18,18 C 32,52 46,94 42,152"/>
+      <path class="drawable bp" d="M 28,58 C 50,42 76,34 98,26"/>
+      <path class="drawable bp" d="M 34,102 C 56,84 80,72 100,62"/>
+      <path class="drawable bp" d="M 42,142 C 58,128 72,122 84,116"/>
+      <path class="drawable lp" d="M 98,26 C 120,10 138,26 122,42 C 104,54 86,38 98,26 Z"/>
+      <path class="drawable lp" d="M 100,62 C 122,46 140,62 124,78 C 106,90 88,74 100,62 Z"/>
+      <path class="drawable lp" d="M 84,116 C 100,102 116,112 106,126 C 94,138 80,126 84,116 Z"/>
+      <!-- flowers -->
+      <g class="fg" transform="translate(98,26)">
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(0)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(72)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(144)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(216)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(288)"/>
+        <circle r="4" fill="#b8a0cc"/>
+      </g>
+      <g class="fg" transform="translate(100,62)">
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(0)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(72)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(144)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(216)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(288)"/>
+        <circle r="3.5" fill="#c09898"/>
+      </g>
+      <g class="fg" transform="translate(42,152)">
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(0)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(72)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(144)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(216)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(288)"/>
+        <circle r="3" fill="#c8a86c"/>
+      </g>
+    </g>
+
+    <!-- top-right: mirror x -->
+    <g class="tr" transform="translate(800,0) scale(-1,1)">
+      <path class="drawable sp" d="M 18,18 C 32,52 46,94 42,152"/>
+      <path class="drawable bp" d="M 28,58 C 50,42 76,34 98,26"/>
+      <path class="drawable bp" d="M 34,102 C 56,84 80,72 100,62"/>
+      <path class="drawable bp" d="M 42,142 C 58,128 72,122 84,116"/>
+      <path class="drawable lp" d="M 98,26 C 120,10 138,26 122,42 C 104,54 86,38 98,26 Z"/>
+      <path class="drawable lp" d="M 100,62 C 122,46 140,62 124,78 C 106,90 88,74 100,62 Z"/>
+      <path class="drawable lp" d="M 84,116 C 100,102 116,112 106,126 C 94,138 80,126 84,116 Z"/>
+      <g class="fg" transform="translate(98,26)">
+        <ellipse rx="8" ry="3.2" fill="var(--f2)" transform="rotate(36)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f2)" transform="rotate(108)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f2)" transform="rotate(180)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f2)" transform="rotate(252)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f2)" transform="rotate(324)"/>
+        <circle r="4" fill="#b89090"/>
+      </g>
+      <g class="fg" transform="translate(100,62)">
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(0)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(72)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(144)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(216)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(288)"/>
+        <circle r="3.5" fill="#9888b8"/>
+      </g>
+      <g class="fg" transform="translate(42,152)">
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(0)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(72)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(144)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(216)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(288)"/>
+        <circle r="3" fill="#c4a060"/>
+      </g>
+    </g>
+
+    <!-- bottom-left: mirror y -->
+    <g class="bl" transform="translate(0,560) scale(1,-1)">
+      <path class="drawable sp" d="M 18,18 C 32,52 46,94 42,152"/>
+      <path class="drawable bp" d="M 28,58 C 50,42 76,34 98,26"/>
+      <path class="drawable bp" d="M 34,102 C 56,84 80,72 100,62"/>
+      <path class="drawable bp" d="M 42,142 C 58,128 72,122 84,116"/>
+      <path class="drawable lp" d="M 98,26 C 120,10 138,26 122,42 C 104,54 86,38 98,26 Z"/>
+      <path class="drawable lp" d="M 100,62 C 122,46 140,62 124,78 C 106,90 88,74 100,62 Z"/>
+      <path class="drawable lp" d="M 84,116 C 100,102 116,112 106,126 C 94,138 80,126 84,116 Z"/>
+      <g class="fg" transform="translate(98,26)">
+        <ellipse rx="8" ry="3.2" fill="var(--f3)" transform="rotate(0)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f3)" transform="rotate(72)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f3)" transform="rotate(144)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f3)" transform="rotate(216)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f3)" transform="rotate(288)"/>
+        <circle r="4" fill="#c8a060"/>
+      </g>
+      <g class="fg" transform="translate(100,62)">
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(0)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(72)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(144)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(216)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f1)" transform="rotate(288)"/>
+        <circle r="3.5" fill="#9888b8"/>
+      </g>
+      <g class="fg" transform="translate(42,152)">
+        <ellipse rx="6" ry="2.4" fill="var(--f2)" transform="rotate(0)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f2)" transform="rotate(72)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f2)" transform="rotate(144)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f2)" transform="rotate(216)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f2)" transform="rotate(288)"/>
+        <circle r="3" fill="#b49090"/>
+      </g>
+    </g>
+
+    <!-- bottom-right: mirror both -->
+    <g class="br" transform="translate(800,560) scale(-1,-1)">
+      <path class="drawable sp" d="M 18,18 C 32,52 46,94 42,152"/>
+      <path class="drawable bp" d="M 28,58 C 50,42 76,34 98,26"/>
+      <path class="drawable bp" d="M 34,102 C 56,84 80,72 100,62"/>
+      <path class="drawable bp" d="M 42,142 C 58,128 72,122 84,116"/>
+      <path class="drawable lp" d="M 98,26 C 120,10 138,26 122,42 C 104,54 86,38 98,26 Z"/>
+      <path class="drawable lp" d="M 100,62 C 122,46 140,62 124,78 C 106,90 88,74 100,62 Z"/>
+      <path class="drawable lp" d="M 84,116 C 100,102 116,112 106,126 C 94,138 80,126 84,116 Z"/>
+      <g class="fg" transform="translate(98,26)">
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(0)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(72)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(144)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(216)"/>
+        <ellipse rx="8" ry="3.2" fill="var(--f1)" transform="rotate(288)"/>
+        <circle r="4" fill="#a090c0"/>
+      </g>
+      <g class="fg" transform="translate(100,62)">
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(0)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(72)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(144)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(216)"/>
+        <ellipse rx="7" ry="2.8" fill="var(--f2)" transform="rotate(288)"/>
+        <circle r="3.5" fill="#b09090"/>
+      </g>
+      <g class="fg" transform="translate(42,152)">
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(0)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(72)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(144)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(216)"/>
+        <ellipse rx="6" ry="2.4" fill="var(--f3)" transform="rotate(288)"/>
+        <circle r="3" fill="#c4a060"/>
+      </g>
+    </g>
+
+    <!-- Extra flowers: bloom on final-bloom, scattered around center -->
+    <g class="xf" transform="translate(290,272)" style="animation-delay:.05s">
+      <ellipse rx="5" ry="2" fill="var(--f1)" transform="rotate(0)"/>
+      <ellipse rx="5" ry="2" fill="var(--f1)" transform="rotate(72)"/>
+      <ellipse rx="5" ry="2" fill="var(--f1)" transform="rotate(144)"/>
+      <ellipse rx="5" ry="2" fill="var(--f1)" transform="rotate(216)"/>
+      <ellipse rx="5" ry="2" fill="var(--f1)" transform="rotate(288)"/>
+      <circle r="2.5" fill="#a888c0"/>
+    </g>
+    <g class="xf" transform="translate(510,265)" style="animation-delay:.18s">
+      <ellipse rx="5" ry="2" fill="var(--f2)" transform="rotate(36)"/>
+      <ellipse rx="5" ry="2" fill="var(--f2)" transform="rotate(108)"/>
+      <ellipse rx="5" ry="2" fill="var(--f2)" transform="rotate(180)"/>
+      <ellipse rx="5" ry="2" fill="var(--f2)" transform="rotate(252)"/>
+      <ellipse rx="5" ry="2" fill="var(--f2)" transform="rotate(324)"/>
+      <circle r="2.5" fill="#b09090"/>
+    </g>
+    <g class="xf" transform="translate(270,330)" style="animation-delay:.32s">
+      <ellipse rx="4.5" ry="1.8" fill="var(--f3)" transform="rotate(0)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f3)" transform="rotate(72)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f3)" transform="rotate(144)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f3)" transform="rotate(216)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f3)" transform="rotate(288)"/>
+      <circle r="2.2" fill="#c4a060"/>
+    </g>
+    <g class="xf" transform="translate(530,330)" style="animation-delay:.45s">
+      <ellipse rx="4.5" ry="1.8" fill="var(--f1)" transform="rotate(0)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f1)" transform="rotate(72)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f1)" transform="rotate(144)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f1)" transform="rotate(216)"/>
+      <ellipse rx="4.5" ry="1.8" fill="var(--f1)" transform="rotate(288)"/>
+      <circle r="2.2" fill="#9880b0"/>
+    </g>
+    <g class="xf" transform="translate(340,252)" style="animation-delay:.60s">
+      <ellipse rx="4" ry="1.6" fill="var(--f2)" transform="rotate(0)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f2)" transform="rotate(72)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f2)" transform="rotate(144)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f2)" transform="rotate(216)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f2)" transform="rotate(288)"/>
+      <circle r="2" fill="#b09090"/>
+    </g>
+    <g class="xf" transform="translate(462,252)" style="animation-delay:.75s">
+      <ellipse rx="4" ry="1.6" fill="var(--f3)" transform="rotate(36)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f3)" transform="rotate(108)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f3)" transform="rotate(180)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f3)" transform="rotate(252)"/>
+      <ellipse rx="4" ry="1.6" fill="var(--f3)" transform="rotate(324)"/>
+      <circle r="2" fill="#c0a060"/>
+    </g>
+  </svg>
+
+  <!-- DRIFTING PETALS (built by JS) -->
+  <div id="petals"></div>
+
+  <!-- TEXT CONTENT -->
+  <div id="content">
+    <div class="qwrap">
+      <p id="q1" class="q">&ldquo;You are allowed to take up space, to be heard, to be whole.&rdquo;</p>
+      <p id="q2" class="q">&ldquo;Your softness is not weakness &mdash; it is the most courageous thing you carry.&rdquo;</p>
+      <p id="q3" class="q">&ldquo;Thirty years of becoming &mdash; and still so much beautiful unfolding ahead.&rdquo;</p>
+    </div>
+
+    <h1 id="bday-title" aria-label="Happy 30th Birthday"></h1>
+    <span class="dot" id="dot1"></span>
+    <h2 id="bday-name">Shiela Mae Presas</h2>
+    <p id="bday-sub">May this decade hold all the gentleness you deserve.</p>
+    <p id="bday-close">With warmth and wonder &mdash; may you always bloom in your own time.</p>
+  </div>
+
+</div>
+<script>
+  // Refs
+  const frame    = document.getElementById('frame');
+  const petalsEl = document.getElementById('petals');
+  const q1 = document.getElementById('q1');
+  const q2 = document.getElementById('q2');
+  const q3 = document.getElementById('q3');
+  const bdayTitle = document.getElementById('bday-title');
+  const bdayName  = document.getElementById('bday-name');
+  const bdaySub   = document.getElementById('bday-sub');
+  const bdayClose = document.getElementById('bday-close');
+  const dot1      = document.getElementById('dot1');
+
+  // Measure paths for draw-on
+  document.querySelectorAll('.drawable').forEach(el => {
+    const len = el.getTotalLength();
+    el.style.strokeDasharray  = len;
+    el.style.strokeDashoffset = len;
+  });
+
+  // Build petals
+  const petalColors = ['#c9b8d4','#d4b8c4','#e8d5b8','#b8d4cc','#d4c4b8'];
+  for (let i = 0; i < 10; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'pw';
+    wrap.style.left              = (4 + Math.random() * 92) + '%';
+    wrap.style.animationDuration = (9 + Math.random() * 7)  + 's';
+    wrap.style.animationDelay    = (Math.random() * 14)      + 's';
+    const sz    = 11 + Math.random() * 10;
+    const color = petalColors[i % petalColors.length];
+    wrap.innerHTML = `<svg width="${sz}" height="${sz * 1.7}" viewBox="0 0 12 20"
+      xmlns="http://www.w3.org/2000/svg">
+      <path d="M6,0 C10,4 11,11 6,20 C1,11 2,4 6,0Z" fill="${color}" opacity="0.68"/>
+    </svg>`;
+    petalsEl.appendChild(wrap);
+  }
+
+  // Typewriter
+  function typewrite(el, text, speed = 58) {
+    el.textContent = '';
+    [...text].forEach((ch, i) => setTimeout(() => { el.textContent += ch; }, i * speed));
+  }
+
+  // Timeline
+  [
+    [500,   () => frame.classList.add('draw-stems')],
+    [2500,  () => frame.classList.add('draw-branches')],
+    [4000,  () => frame.classList.add('draw-leaves')],
+    [5500,  () => frame.classList.add('bloom')],
+    [7000,  () => q1.classList.add('on')],
+    [11000, () => q1.classList.remove('on')],
+    [12000, () => q2.classList.add('on')],
+    [16000, () => q2.classList.remove('on')],
+    [17000, () => q3.classList.add('on')],
+    [21000, () => q3.classList.remove('on')],
+    [22000, () => petalsEl.classList.add('on')],
+    [23000, () => typewrite(bdayTitle, 'Happy 30th Birthday')],
+    [25200, () => { bdayName.classList.add('on'); dot1.classList.add('on'); }],
+    [26800, () => bdaySub.classList.add('on')],
+    [28200, () => bdayClose.classList.add('on')],
+    [29200, () => frame.classList.add('final-bloom')],
+  ].forEach(([t, fn]) => setTimeout(fn, t));
+</script>
+</body>
+</html>
