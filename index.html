@@ -348,6 +348,7 @@
     <p id="bday-close">With warmth and wonder &mdash; may you always bloom in your own time.</p>
   </div>
 
+  <canvas id="confetti-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:30"></canvas>
 </div>
 <script>
   const frame    = document.getElementById('frame');
@@ -426,12 +427,76 @@
       setTimeout(() => div.classList.remove('arriving'), 2500);
     }));
   }
+  // Synthesized balloon pop — sharp crack + highpass air hiss (no bass = no fart)
+  let _audioCtx;
+  function playPop() {
+    try {
+      if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ac = _audioCtx, now = ac.currentTime;
+      // Layer 1: rubber snap — short wideband crack
+      const b1 = ac.createBuffer(1, Math.ceil(ac.sampleRate * 0.032), ac.sampleRate);
+      const d1 = b1.getChannelData(0);
+      for (let i = 0; i < d1.length; i++) d1[i] = (Math.random()*2-1) * (1 - i/d1.length);
+      const s1 = ac.createBufferSource(); s1.buffer = b1;
+      const g1 = ac.createGain(); g1.gain.setValueAtTime(1.1, now); g1.gain.exponentialRampToValueAtTime(0.001, now + 0.032);
+      s1.connect(g1); g1.connect(ac.destination); s1.start(now);
+      // Layer 2: air hiss — highpass cuts bass so it stays crisp, not rumbly
+      const b2 = ac.createBuffer(1, Math.ceil(ac.sampleRate * 0.085), ac.sampleRate);
+      const d2 = b2.getChannelData(0);
+      for (let i = 0; i < d2.length; i++) { const t = i/d2.length; d2[i] = (Math.random()*2-1) * Math.pow(1-t, 2); }
+      const s2 = ac.createBufferSource(); s2.buffer = b2;
+      const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800;
+      const g2 = ac.createGain(); g2.gain.setValueAtTime(0.65, now); g2.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+      s2.connect(hp); hp.connect(g2); g2.connect(ac.destination); s2.start(now);
+    } catch(e) {}
+  }
+
+  // Confetti canvas burst
+  const cfx = { canvas: null, ctx: null, parts: [], raf: null };
+  function initConfetti() {
+    cfx.canvas = document.getElementById('confetti-canvas');
+    cfx.ctx = cfx.canvas.getContext('2d');
+    function sz() { cfx.canvas.width = innerWidth; cfx.canvas.height = innerHeight; }
+    sz(); window.addEventListener('resize', sz);
+  }
+  function burstConfetti(x, y, colors) {
+    if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    for (let i = 0; i < 30; i++) {
+      const a = Math.random() * Math.PI * 2, spd = 2 + Math.random() * 9;
+      cfx.parts.push({ x, y, vx: Math.cos(a)*spd, vy: Math.sin(a)*spd - 5,
+        color: colors[i % colors.length], w: 4+Math.random()*7, h: 3+Math.random()*5,
+        rot: Math.random()*Math.PI*2, rv: (Math.random()-.5)*.28, alpha: 1 });
+    }
+    if (!cfx.raf) tickConfetti();
+  }
+  function tickConfetti() {
+    const { canvas, ctx, parts } = cfx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    cfx.parts = parts.filter(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.vx *= 0.985;
+      p.rot += p.rv; p.alpha -= 0.015;
+      if (p.alpha <= 0) return false;
+      ctx.save(); ctx.globalAlpha = p.alpha; ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+      return true;
+    });
+    cfx.raf = cfx.parts.length ? requestAnimationFrame(tickConfetti) : null;
+    if (!cfx.raf) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
   function popBalloon(e) {
     const bg = e.currentTarget;
     if (bg.classList.contains('popping')) return;
     const leftPct = parseFloat(bg.style.left);
     const topPct  = parseFloat(bg.style.getPropertyValue('--yt'));
     const ci      = parseInt(bg.dataset.ci ?? -1);
+    const svgPath = bg.querySelector('path');
+    const fill    = svgPath ? svgPath.getAttribute('fill')   : '#f4a5ae';
+    const stroke  = svgPath ? svgPath.getAttribute('stroke') : '#d08090';
+    const rect = bg.getBoundingClientRect();
+    playPop();
+    burstConfetti(rect.left + rect.width * .5, rect.top + rect.height * .2,
+      [fill, stroke, '#fffcfa', '#e8d5b8', '#c9b8d4']);
     bg.classList.add('popping');
     bg.removeEventListener('click', popBalloon);
     setTimeout(() => { bg.remove(); spawnBalloon(leftPct, topPct, ci); }, 340);
@@ -440,6 +505,7 @@
     bg.dataset.ci = -1;
     bg.addEventListener('click', popBalloon);
   });
+  initConfetti();
 
   // Cycle quotes infinitely as ambient overlay after greeting is settled
   function startAmbientCycle() {
