@@ -35,9 +35,9 @@
     .sp{stroke:var(--stem);stroke-width:2.5}
     .bp{stroke:var(--stem);stroke-width:1.8}
     .lp{stroke:var(--leaf);stroke-width:1.5}
-    .draw-stems    .sp{animation:draw 1.9s cubic-bezier(.4,0,.2,1) forwards}
-    .draw-branches .bp{animation:draw 1.6s cubic-bezier(.4,0,.2,1) forwards}
-    .draw-leaves   .lp{animation:draw 1.3s cubic-bezier(.4,0,.2,1) forwards}
+    .draw-stems    .sp{animation:draw 1.1s cubic-bezier(.4,0,.2,1) forwards}
+    .draw-branches .bp{animation:draw 0.9s cubic-bezier(.4,0,.2,1) forwards}
+    .draw-leaves   .lp{animation:draw 0.8s cubic-bezier(.4,0,.2,1) forwards}
     .tl .sp{animation-delay:.00s}.tr .sp{animation-delay:.35s}
     .bl .sp{animation-delay:.60s}.br .sp{animation-delay:.90s}
     .tl .bp{animation-delay:.00s}.tr .bp{animation-delay:.35s}
@@ -46,7 +46,7 @@
     .bl .lp{animation-delay:.45s}.br .lp{animation-delay:.65s}
     @keyframes draw{to{stroke-dashoffset:0}}
     .fg{transform-box:fill-box;transform-origin:center;opacity:0;transform:scale(0)}
-    .bloom .fg{animation:bloom .7s cubic-bezier(.34,1.56,.64,1) forwards}
+    .bloom .fg{animation:bloom .5s cubic-bezier(.34,1.56,.64,1) forwards}
     .bloom .tl .fg:nth-child(1){animation-delay:.0s}.bloom .tl .fg:nth-child(2){animation-delay:.2s}.bloom .tl .fg:nth-child(3){animation-delay:.4s}
     .bloom .tr .fg:nth-child(1){animation-delay:.1s}.bloom .tr .fg:nth-child(2){animation-delay:.3s}.bloom .tr .fg:nth-child(3){animation-delay:.5s}
     .bloom .bl .fg:nth-child(1){animation-delay:.2s}.bloom .bl .fg:nth-child(2){animation-delay:.4s}.bloom .bl .fg:nth-child(3){animation-delay:.6s}
@@ -112,11 +112,11 @@
     @keyframes gpulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.85;transform:scale(1.2)}}
 
     /* ── CONTENT ── */
-    #content{position:relative;z-index:10;text-align:center;max-width:640px;width:90vw;padding:1.5rem 1rem;margin-bottom:0;transition:margin-bottom .9s ease}
-    #content.bday{margin-bottom:22vh}
-    .qwrap{position:relative;height:clamp(7rem,18vw,10rem);margin-bottom:1.4rem;overflow:hidden;transition:height .9s ease,opacity .8s ease,margin .9s ease}
-    .qwrap.gone{height:0!important;opacity:0;margin-bottom:0}
-    .q{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(.95rem,2.4vw,1.2rem);font-style:italic;color:var(--tsub);line-height:1.75;opacity:0;transition:opacity 1.2s ease;padding:0 .5rem}
+    #content{position:relative;z-index:10;text-align:center;max-width:640px;width:90vw;padding:1.5rem 1rem;margin-bottom:22vh}
+    /* ambient quote strip — hidden until after greeting, then fixed at top */
+    .qwrap{overflow:hidden;opacity:0;pointer-events:none}
+    .qwrap.ambient{position:fixed;bottom:calc(2% + clamp(153px,23.4vw,216px) + 1rem);left:50%;transform:translateX(-50%);width:90vw;max-width:560px;height:clamp(4rem,9vw,5.5rem);opacity:1;pointer-events:none;z-index:20;transition:opacity 1.4s ease}
+    .q{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(.72rem,1.6vw,.9rem);font-style:italic;color:var(--tsub);line-height:1.75;opacity:0;transition:opacity 1.2s ease;padding:0 1rem}
     .q.on{opacity:1}
     #bday-title{font-size:clamp(1.2rem,3.5vw,1.9rem);font-weight:normal;letter-spacing:.1em;color:var(--text);min-height:2.4rem;overflow:hidden;white-space:nowrap}
     .dot{display:block;width:4px;height:4px;border-radius:50%;background:var(--f1);margin:.7rem auto;opacity:0;transition:opacity 1s ease}
@@ -354,7 +354,6 @@
   const bdaySub   = document.getElementById('bday-sub');
   const bdayClose = document.getElementById('bday-close');
   const dot1      = document.getElementById('dot1');
-  const content   = document.getElementById('content');
 
   // Measure all drawable paths for stroke-dashoffset draw-on
   document.querySelectorAll('.drawable, .ck').forEach(el => {
@@ -386,34 +385,39 @@
     [...text].forEach((ch, i) => setTimeout(() => { el.textContent += ch; }, i * (speed || 58)));
   }
 
-  // Timeline
+  // Cycle quotes infinitely as ambient overlay after greeting is settled
+  function startAmbientCycle() {
+    const qs = [q1, q2, q3];
+    let i = 0;
+    qwrap.classList.add('ambient');
+    function show() {
+      qs.forEach(q => q.classList.remove('on'));
+      qs[i].classList.add('on');
+      i = (i + 1) % qs.length;
+    }
+    show();
+    setInterval(show, 5500);
+  }
+
+  // Timeline — botanical draws, then birthday reveals immediately after
   [
-    [500,   () => frame.classList.add('draw-stems')],
-    [2500,  () => frame.classList.add('draw-branches')],
-    [4000,  () => frame.classList.add('draw-leaves')],
-    [5500,  () => frame.classList.add('bloom')],
-    [7000,  () => q1.classList.add('on')],
-    [11000, () => q1.classList.remove('on')],
-    [12000, () => q2.classList.add('on')],
-    [16000, () => q2.classList.remove('on')],
-    [17000, () => q3.classList.add('on')],
-    [21000, () => q3.classList.remove('on')],
-    // Birthday reveal
-    [21800, () => { qwrap.classList.add('gone'); content.classList.add('bday'); }],
-    [22000, () => petelsEl.classList.add('on')],
-    [22200, () => { ballsEl.classList.add('on'); setTimeout(() => ballsEl.classList.add('swaying'), 2800); }],
-    [22800, () => cakeWrap.classList.add('on')],
-    [23000, () => cakeSvg.classList.add('drawing')],
-    // Cake fill + decorations ~2s after drawing starts
-    [25200, () => { cakeSvg.classList.add('colored'); }],
-    // Candle lights ~2.8s after drawing
-    [25800, () => cakeSvg.classList.add('lit')],
-    // Message
-    [23500, () => typewrite(bdayTitle, 'Happy 30th Birthday')],
-    [25600, () => { bdayName.classList.add('on'); dot1.classList.add('on'); }],
-    [27000, () => bdaySub.classList.add('on')],
-    [28400, () => bdayClose.classList.add('on')],
-    [29200, () => frame.classList.add('final-bloom')],
+    [200,  () => frame.classList.add('draw-stems')],
+    [1400, () => frame.classList.add('draw-branches')],
+    [2200, () => frame.classList.add('draw-leaves')],
+    [3000, () => frame.classList.add('bloom')],
+    // Birthday reveal begins as bloom finishes
+    [3900, () => petelsEl.classList.add('on')],
+    [4000, () => typewrite(bdayTitle, 'Happy 30th Birthday')],
+    [4200, () => { ballsEl.classList.add('on'); setTimeout(() => ballsEl.classList.add('swaying'), 2800); }],
+    [4400, () => cakeWrap.classList.add('on')],
+    [4600, () => cakeSvg.classList.add('drawing')],
+    [6000, () => { bdayName.classList.add('on'); dot1.classList.add('on'); }],
+    [6800, () => cakeSvg.classList.add('colored')],
+    [7400, () => cakeSvg.classList.add('lit')],
+    [7400, () => bdaySub.classList.add('on')],
+    [8800, () => bdayClose.classList.add('on')],
+    [9600,  () => frame.classList.add('final-bloom')],
+    [11000, () => startAmbientCycle()],
   ].forEach(([t, fn]) => setTimeout(fn, t));
 </script>
 </body>
